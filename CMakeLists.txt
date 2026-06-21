@@ -11,7 +11,21 @@ else()
     add_compile_options(-mavx2 -mfma)
 endif()
 
-find_package(SndFile REQUIRED)
+find_package(SndFile QUIET)
+if(NOT SndFile_FOUND)
+    find_path(SndFile_INCLUDE_DIR NAMES sndfile.h)
+    find_library(SndFile_LIBRARY NAMES sndfile)
+    if(SndFile_INCLUDE_DIR AND SndFile_LIBRARY)
+        add_library(SndFile::sndfile UNKNOWN IMPORTED)
+        set_target_properties(SndFile::sndfile PROPERTIES
+            IMPORTED_LOCATION "${SndFile_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${SndFile_INCLUDE_DIR}"
+        )
+        set(SndFile_INCLUDE_DIRS ${SndFile_INCLUDE_DIR})
+    else()
+        message(FATAL_ERROR "SndFile not found! Please install libsndfile.")
+    endif()
+endif()
 
 add_executable(dsp 
     src/main.cpp 
