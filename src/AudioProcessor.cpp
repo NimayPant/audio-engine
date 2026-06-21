@@ -1,6 +1,7 @@
 #include "../include/AudioProcessor.h"
 #include "../include/Effects.h"
 #include <algorithm>
+#include <cmath>
 #include <cctype>
 #include <iostream>
 #include <string>
