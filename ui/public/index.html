@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Processor</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="plugin-container">
+        <header class="plugin-header">
+            <div class="header-left">
+                <h1>Nimay's Audio Engine</h1>
+            </div>
+            <div class="header-right">
+                <button class="preset-btn" id="btn-default-preset">Reset</button>
+                <div class="file-uploader">
+                    <input type="file" id="audio-file" accept=".wav,.mp3" />
+                    <label for="audio-file" class="upload-btn">Open File</label>
+                    <span id="file-name" class="file-name">None</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="visualizer-section">
+            <div class="visualizer-header">
+                <h3>Signal</h3>
+            </div>
+            <div class="visualizer-content">
+                <canvas id="waveform-canvas"></canvas>
+                <div id="no-data-msg">Input signal empty</div>
+            </div>
+        </section>
+
+        <main class="plugin-rack">
+            <div class="module" id="module-eq">
+                <div class="module-header">
+                    <h2>Equalizer</h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-eq">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="eq-graph-container">
+                    <canvas id="eq-graph-canvas"></canvas>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Frequency</label>
+                        <input type="range" id="eq-freq" min="20" max="20000" step="1" value="1000">
+                        <span class="val" id="val-eq-freq">1000 Hz</span>
+                    </div>
+                    <div class="knob-group">
+                        <label>Bandwidth (Q)</label>
+                        <input type="range" id="eq-q" min="0.1" max="10" step="0.1" value="1">
+                        <span class="val" id="val-eq-q">1.0</span>
+                    </div>
+                    <div class="knob-group">
+                        <label>Gain</label>
+                        <input type="range" id="eq-gain" min="-24" max="24" step="0.1" value="0">
+                        <span class="val" id="val-eq-gain">0 dB</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module premium-simd" id="module-biquad-simd">
+                <div class="module-header">
+                    <h2>Biquad EQ <span class="badge">SIMD</span></h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-biquad-simd">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="eq-graph-container">
+                    <canvas id="biquad-graph-canvas"></canvas>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Frequency</label>
+                        <input type="range" id="biquad-freq" min="20" max="20000" step="1" value="1000">
+                        <span class="val" id="val-biquad-freq">1000 Hz</span>
+                    </div>
+                    <div class="knob-group">
+                        <label>Bandwidth (Q)</label>
+                        <input type="range" id="biquad-q" min="0.1" max="10" step="0.1" value="1">
+                        <span class="val" id="val-biquad-q">1.0</span>
+                    </div>
+                    <div class="knob-group">
+                        <label>Gain</label>
+                        <input type="range" id="biquad-gain" min="-24" max="24" step="0.1" value="0">
+                        <span class="val" id="val-biquad-gain">0 dB</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module" id="module-reverb">
+                <div class="module-header">
+                    <h2>Reverb</h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-reverb">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Room Size</label>
+                        <input type="range" id="reverb-room" min="0" max="1" step="0.01" value="0.8">
+                        <span class="val" id="val-reverb-room">80 %</span>
+                    </div>
+                    <div class="knob-group">
+                        <label>Dry/Wet Mix</label>
+                        <input type="range" id="reverb-mix" min="0" max="1" step="0.01" value="0.5">
+                        <span class="val" id="val-reverb-mix">50 %</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module" id="module-delay">
+                <div class="module-header">
+                    <h2>Delay</h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-delay">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Time</label>
+                        <input type="range" id="delay-time" min="1" max="2000" step="1" value="500">
+                        <span class="val" id="val-delay-time">500 ms</span>
+                    </div>
+                    <div class="knob-group">
+                        <label>Feedback</label>
+                        <input type="range" id="delay-feedback" min="0" max="0.95" step="0.01" value="0.5">
+                        <span class="val" id="val-delay-feedback">50 %</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module premium-simd" id="module-gain-simd">
+                <div class="module-header">
+                    <h2>Output <span class="badge">SIMD</span></h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-gain-simd">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Gain</label>
+                        <input type="range" id="gain-simd-val" min="0" max="2" step="0.01" value="1.0">
+                        <span class="val" id="val-gain-simd-val">1.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module premium-ml" id="module-smart-gate">
+                <div class="module-header">
+                    <h2>Noise Gate <span class="badge">ML</span></h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-smart-gate">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Threshold</label>
+                        <input type="range" id="smart-gate-thresh" min="0" max="1" step="0.01" value="0.5">
+                        <span class="val" id="val-smart-gate-thresh">0.5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module premium-ml" id="module-ml-dynamic-eq">
+                <div class="module-header">
+                    <h2>Dynamic EQ <span class="badge">ML</span></h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-ml-dynamic-eq">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="eq-graph-container" style="height: 60px; border-color: rgba(75, 123, 236, 0.3);">
+                    <canvas id="ml-eq-graph-canvas"></canvas>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Intensity</label>
+                        <input type="range" id="ml-eq-intensity" min="0" max="1" step="0.01" value="0.5">
+                        <span class="val" id="val-ml-eq-intensity">50 %</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module premium-ml" id="module-genre-aware">
+                <div class="module-header">
+                    <h2>Genre Awareness <span class="badge">ML</span></h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-genre-aware">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border-radius: 4px; padding: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Detected</span>
+                        <span id="detected-genre" style="font-size: 11px; color: var(--accent); font-weight: 600;">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Match</span>
+                        <span id="genre-confidence" style="font-size: 11px; color: #88c999;">-%</span>
+                    </div>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Target Genre</label>
+                        <select id="genre-select" style="width: 100%; padding: 8px; border-radius: 2px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 11px;">
+                            <option value="0">Pop</option>
+                            <option value="1">Electronic</option>
+                            <option value="2">Rock</option>
+                            <option value="3">Hip-Hop</option>
+                            <option value="4">Folk</option>
+                            <option value="5">Experimental</option>
+                            <option value="6">International</option>
+                            <option value="7">Indie</option>
+                            <option value="8">Jazz</option>
+                            <option value="9">Soul</option>
+                            <option value="10">Punk</option>
+                            <option value="11">Metal</option>
+                            <option value="12">RnB</option>
+                            <option value="13">Dance</option>
+                            <option value="14">Latin</option>
+                            <option value="15">Classical</option>
+                        </select>
+                    </div>
+                    <div class="knob-group">
+                        <label>Intensity</label>
+                        <input type="range" id="genre-intensity" min="0" max="1" step="0.01" value="1">
+                        <span class="val" id="val-genre-intensity">100 %</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module premium-ml" id="module-smart-compress">
+                <div class="module-header">
+                    <h2>Smart Dynamics <span class="badge">ML</span></h2>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-smart-compress">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="knobs-container">
+                    <div class="knob-group">
+                        <label>Intensity</label>
+                        <input type="range" id="smart-compress-intensity" min="0" max="1" step="0.01" value="0.5">
+                        <span class="val" id="val-smart-compress-intensity">50 %</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <section class="log-section">
+            <div class="log-header">Status</div>
+            <div id="log-output" class="log-output">
+                <div class="log-item system">Engine initialized.</div>
+            </div>
+        </section>
+
+        <footer class="plugin-footer">
+            <div class="transport-controls">
+                <button id="btn-process" class="process-btn" disabled>
+                    PROCESS
+                </button>
+                <div class="processing-spinner hidden" id="spinner"></div>
+            </div>
+            <div class="audio-player-custom hidden" id="audio-player-container">
+                <button id="btn-play-output" class="transport-btn">PLAY</button>
+                <button id="btn-pause-output" class="transport-btn">PAUSE</button>
+                <div class="progress-container">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <a id="download-link" href="#" download="output.wav" class="download-btn">SAVE</a>
+                <audio id="output-audio" style="display:none"></audio>
+            </div>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "features_shape": [100],
+  "features_sample": [-65.2035, -65.2035, -65.2035, -65.2035, -65.2507, -65.2507, -65.2507, -65.3924, -65.3924, -65.6293],
+  "eq_gains": [-1.81753, -1.77625, -2.99694, -1.07383, 3.3048, -1.43267, 1.50071, 5.29169],
+  "genre_id": 5,
+  "genre_name": "Experimental",
+  "genre_confidence": 0.464509,
+  "genre_probs_top3": [
+    {"genre": "Experimental", "probability": 0.464509},
+    {"genre": "Electronic", "probability": 0.330346},
+    {"genre": "RnB", "probability": 0.0534362}
+  ]
+}
