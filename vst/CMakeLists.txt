@@ -45,8 +45,11 @@ else()
     target_compile_options(DSP_VST PRIVATE -mavx2 -mfma)
 endif()
 
-
-target_compile_definitions(DSP_VST PUBLIC JUCE_VST3_CAN_REPLACE_VST2=0)
+target_compile_definitions(DSP_VST PUBLIC 
+    JUCE_VST3_CAN_REPLACE_VST2=0
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+)
 
 target_include_directories(DSP_VST PRIVATE 
     ${PROJECT_SOURCE_DIR} 
